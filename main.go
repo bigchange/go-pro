@@ -9,6 +9,7 @@ import (
   "bufio"
   "strings"
   "fmt"
+  "time"
 )
 
 // http handler
@@ -74,10 +75,7 @@ func readLineByLine(fileName string) (error error) {
 
 }
 
-func main() {
-
-  fmt.Println("go hello, world!!")
-
+func test()  {
   // 正常情况
   if result, errorMsg := example.Divide(100, 10); errorMsg == "" {
     fmt.Println("100/10 = ", result)
@@ -103,7 +101,9 @@ func main() {
   }
   var resumeInffo = example.NewResume("CJYOU", "188", "SH")
 
-  fmt.Print("info: name -> " + resumeInffo.GetName())
+  fmt.Println("info: name -> " + resumeInffo.GetName())
+
+  fmt.Println("time:->", time.Now().Unix())
 
   // http resquest
   // http.HandleFunc("/go", helloHandler)
@@ -111,6 +111,11 @@ func main() {
 
   // server filesystem
   // http.ListenAndServe(":12345", http.FileServer(http.Dir(".")))
+}
+
+func main() {
+
+  fmt.Println("go hello, world!!")
 
 
 }
