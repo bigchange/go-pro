@@ -8,9 +8,12 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"errors"
 
 	"./example"
 )
@@ -27,8 +30,150 @@ func main() {
 	// runThread()
 	// testChannel()
 	// testCloseChannel()
-	testSelect()
+	// testSelect()
+	// testCrawl()
+	// testDefer()
+	testReflect()
 
+}
+
+// reflect
+
+func testReflect() {
+	var x float64 = 3.4
+	fmt.Printf("value is %v \n", x)
+	p := reflect.ValueOf(&x)
+	v := p.Elem()
+	v.SetFloat(7.1)
+	fmt.Printf("value is %v \n", x)
+}
+
+// defer
+
+func testDefer() {
+	for i := 0; i < 5; i++ {
+		defer fmt.Printf("%d ", i)
+		fmt.Printf("index - %v \n", i)
+	}
+}
+
+// web 爬虫:
+// 修改 Crawl 函数来并行的抓取 URLs，并且保证不重复。
+// 提示：你可以用一个 map 来缓存已经获取的 URL，但是需要注意 map 本身并不是并发安全的！
+
+type UrlMap struct {
+	urls map[string]interface{}
+	mux  sync.Mutex
+}
+
+var urlMap = &UrlMap{urls: make(map[string]interface{})}
+
+type Fetcher interface {
+	// Fetch 返回 URL 的 body 内容，并且将在这个页面上找到的 URL 放到一个 slice 中。
+	Fetch(url string) (body string, urls []string, err error)
+}
+
+func dedupCrawlUrl(urlMap *UrlMap, url string, body string) error {
+	urlMap.mux.Lock()
+	if _, ok := urlMap.urls[url]; ok {
+		fmt.Printf("already crawl url -> %v\n", url)
+		urlMap.mux.Unlock()
+		return errors.New("exits url dont need to crawl")
+	} else {
+		urlMap.urls[url] = body
+		urlMap.mux.Unlock()
+		return nil
+	}
+
+}
+
+// Crawl 使用 fetcher 从某个 URL 开始递归的爬取页面，直到达到最大深度。
+func Crawl(url string, depth int, fetcher Fetcher) {
+	// TODO: 并行的抓取 URL。
+	// TODO: 不重复抓取页面。
+	// 下面并没有实现上面两种情况：
+	if depth <= 0 {
+		fmt.Printf("depth over\n")
+		return
+	}
+
+	error := dedupCrawlUrl(urlMap, url, "exist")
+	if error != nil {
+		return
+	}
+
+	body, urls, err := fetcher.Fetch(url)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("found: %s %q\n", url, body)
+	for _, u := range urls {
+		Crawl(u, depth-1, fetcher)
+	}
+	return
+}
+
+// fakeFetcher 是返回若干结果的 Fetcher。
+type fakeFetcher map[string]*fakeResult
+
+type fakeResult struct {
+	body string
+	urls []string
+}
+
+func (f fakeFetcher) Fetch(url string) (string, []string, error) {
+	if res, ok := f[url]; ok {
+		return res.body, res.urls, nil
+	}
+	return "", nil, fmt.Errorf("not found: %s", url)
+}
+
+// fetcher 是填充后的 fakeFetcher。
+var fetcher = fakeFetcher{
+	"http://golang.org/": &fakeResult{
+		"The Go Programming Language",
+		[]string{
+			"http://golang.org/pkg/",
+			"http://golang.org/cmd/",
+		},
+	},
+	"http://golang.org/pkg/": &fakeResult{
+		"Packages",
+		[]string{
+			"http://golang.org/",
+			"http://golang.org/cmd/",
+			"http://golang.org/pkg/fmt/",
+			"http://golang.org/pkg/os/",
+		},
+	},
+	"http://golang.org/pkg/fmt/": &fakeResult{
+		"Package fmt",
+		[]string{
+			"http://golang.org/",
+			"http://golang.org/pkg/",
+			"http://golang.org/pkg/cjyou/",
+		},
+	},
+	"http://golang.org/pkg/os/": &fakeResult{
+		"Package os",
+		[]string{
+			"http://golang.org/",
+			"http://golang.org/pkg/",
+		},
+	},
+	"http://golang.org/pkg/cjyou/": &fakeResult{
+		"Package cjyou",
+		[]string{
+			"http://golang.org/",
+			"http://golang.org/pkg/",
+			"http://golang.org/cmd/",
+		},
+	},
+}
+
+func testCrawl() {
+	Crawl("http://golang.org/", 4, fetcher)
 }
 
 // sync.Mutex : 互斥锁
@@ -72,10 +217,14 @@ type Tree struct {
 }
 
 // Walk 步进 tree t 将所有的值从 tree 发送到 channel ch。
-func Walk(t *Tree, ch chan int)
+func Walk(t *Tree, ch chan int) {
+	return
+}
 
 // Same 检测树 t1 和 t2 是否含有相同的值。
-func Same(t1, t2 *Tree) bool
+func Same(t1, t2 *Tree) bool {
+	return false
+}
 
 // select: select 会阻塞，直到条件分支中的某个可以继续执行，这时就会执行那个条件分支。当多个都准备好的时候，会随机选择一个。
 func fibonacciInSelect(c, quit chan int) {
@@ -102,7 +251,7 @@ func testSelect() {
 		}
 		quit <- 0
 	}()
-	fibonacci(c, quit)
+	fibonacciInSelect(c, quit)
 }
 
 // 关闭管道

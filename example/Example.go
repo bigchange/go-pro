@@ -2,10 +2,9 @@ package example
 
 import (
 	"fmt"
-	"net/http"
 	"io"
+	"net/http"
 )
-
 
 // 定义一个 DivideError 结构 (除数不能为零)
 type DivideError struct {
@@ -14,12 +13,12 @@ type DivideError struct {
 }
 
 type Resume struct {
-	name string
-	phone string
+	name    string
+	phone   string
 	address string
 }
 
-// 实现 	`error` 接口
+// 实现 	`error` 接口  Error() 方法
 func (divide *DivideError) Error() string {
 	stringFormat := `
 	Cannot proceed, the divider is zero.
@@ -39,7 +38,7 @@ func (resume *Resume) Error() string {
 
 // func 首字母大写
 func NewResume(name string, phone string, address string) *Resume {
-	return &Resume { name:name, phone:phone, address:address}
+	return &Resume{name: name, phone: phone, address: address}
 }
 
 // 定义 `int` 类型除法运算的函数
@@ -65,7 +64,7 @@ func Divide(varDividee int, varDivider int) (result int, errorMsg string) {
 }
 
 func (resume *Resume) GetName() string {
-	return  resume.name
+	return resume.name
 }
 
 func (resume *Resume) GetPhone() string {
@@ -73,11 +72,11 @@ func (resume *Resume) GetPhone() string {
 }
 
 // handler request
-func helloHandler(writer http.ResponseWriter, request *http.Request)  {
+func helloHandler(writer http.ResponseWriter, request *http.Request) {
 	io.WriteString(writer, "hello, world!!")
 }
 
-func echoHandler(writer http.ResponseWriter, request *http.Request)  {
+func echoHandler(writer http.ResponseWriter, request *http.Request) {
 	io.WriteString(writer, request.URL.Path)
 }
 
@@ -93,5 +92,3 @@ func router() {
 func formatResponse(msg string) {
 	fmt.Sprintf("hello world -> %s", msg)
 }
-
-
