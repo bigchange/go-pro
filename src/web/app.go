@@ -1,34 +1,74 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
-	"strings"
+	"os"
+	// 如何导入其他包(hostname + project dir)
+	"github.com/bigchange/go-pro/src/web/services"
 )
 
-// 如何导入其他包(services)
+// 客户端上传文件
+func postFile(filename string, targetUrl string) error {
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
 
-func SayHello(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()       //解析参数，默认是不会解析的
-	fmt.Println(r.Form) //这些信息是输出到服务器端的打印信息
-	fmt.Println("path", r.URL.Path)
-	fmt.Println("scheme", r.URL.Scheme)
-	fmt.Println(r.Form["url_long"])
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ""))
+	//关键的一步操作
+	fileWriter, err := bodyWriter.CreateFormFile("uploadfile", filename)
+	if err != nil {
+		fmt.Println("error writing to buffer")
+		return err
 	}
-	fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
+
+	//打开文件句柄操作
+	fh, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("error opening file")
+		return err
+	}
+	defer fh.Close()
+
+	//iocopy
+	_, err = io.Copy(fileWriter, fh)
+	if err != nil {
+		return err
+	}
+
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+
+	resp, err := http.Post(targetUrl, contentType, bodyBuf)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	resp_body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Println(resp.Status)
+	fmt.Println(string(resp_body))
+	return nil
 }
 
+var caseAPI = new(services.CaseApi)
+
 func main() {
-	http.HandleFunc("/index", SayHello)
+
+	fmt.Println("hello world \n")
+	http.HandleFunc("/index", caseAPI.SayHello)
+	http.HandleFunc("/login".caseAPI.Login)
 	err := http.ListenAndServe(":9090", nil) //设置监听的端口
+	// var myMux = new(services.MyMux)
+	// http.ListenAndServe(":9090", myMux)
+	fmt.Println("listen port at :9090")
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
-	} else {
-		fmt.Println("listen at:9090")
 	}
 
 }

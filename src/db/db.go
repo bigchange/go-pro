@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	
+
+	"github.com/bigchange/go-pro/src/utils"
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql" //import postgres
-	"bigchange.com/go-pro/db"
 )
 
 //DB ...
@@ -18,13 +18,13 @@ type DB struct {
 
 const (
 	//DbUser ...
-	DbUser = "casem"
+	DbUser = ""
 	//DbPassword ...
-	DbPassword = "Casem123@"
+	DbPassword = ""
 	//DbName ...
-	DbName = "casem"
+	DbName = ""
 
-	DbHost = "172.16.52.52"
+	DbHost = ""
 )
 
 var db *gorp.DbMap
@@ -33,7 +33,7 @@ var db *gorp.DbMap
 func Init() {
 
 	// dbinfo := fmt.Sprintf("tcp:%s:3306*%s/%s/%s",
-	// 	DbHost, DbName, DbUser, DbPassword)
+	// DbHost, DbName, DbUser, DbPassword)
 
 	dbinfo := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
 		DbUser, DbPassword, DbHost, DbName)
@@ -46,7 +46,7 @@ func Init() {
 
 }
 
-//ConnectDB ...
+// ConnectDB ...
 func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
 	utils.GetLogger().Infof("connect to :%v ", dataSourceName)
 	db, err := sql.Open("mysql", dataSourceName)
@@ -61,7 +61,7 @@ func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
 	return dbmap, nil
 }
 
-//GetDB ...
+// GetDB ...
 func GetDB() *gorp.DbMap {
 	return db
 }
