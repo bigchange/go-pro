@@ -13,7 +13,6 @@ import (
 	// "github.com/bigchange/go-pro/src/web/services"
 	"./services"
 	"errors"
-	"time"
 )
 
 var caseAPI = new(services.CaseApi)
@@ -61,15 +60,19 @@ func postFile(filename string, targetUrl string) error {
 	return nil
 }
 
-func checkError(err error)  {
+func checkError(err error) error {
 	if err != nil {
 		return errors.New("Case not found")
 	}
+	return nil
 }
 
 func main() {
 
 	fmt.Println("hello world \n")
+
+	services.ParserTemplate()
+
 	http.HandleFunc("/index", caseAPI.SayHello)
 	http.HandleFunc("/login", caseAPI.Login)
 	err := http.ListenAndServe(":9090", nil) //设置监听的端口
