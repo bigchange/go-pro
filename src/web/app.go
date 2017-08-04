@@ -10,8 +10,13 @@ import (
 	"net/http"
 	"os"
 	// 如何导入其他包(hostname + project dir)
-	"github.com/bigchange/go-pro/src/web/services"
+	// "github.com/bigchange/go-pro/src/web/services"
+	"./services"
+	"errors"
+	"time"
 )
+
+var caseAPI = new(services.CaseApi)
 
 // 客户端上传文件
 func postFile(filename string, targetUrl string) error {
@@ -56,13 +61,17 @@ func postFile(filename string, targetUrl string) error {
 	return nil
 }
 
-var caseAPI = new(services.CaseApi)
+func checkError(err error)  {
+	if err != nil {
+		return errors.New("Case not found")
+	}
+}
 
 func main() {
 
 	fmt.Println("hello world \n")
 	http.HandleFunc("/index", caseAPI.SayHello)
-	http.HandleFunc("/login".caseAPI.Login)
+	http.HandleFunc("/login", caseAPI.Login)
 	err := http.ListenAndServe(":9090", nil) //设置监听的端口
 	// var myMux = new(services.MyMux)
 	// http.ListenAndServe(":9090", myMux)

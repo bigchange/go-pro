@@ -17,6 +17,13 @@ type CaseApi struct{}
 
 // login
 func (api *CaseApi) Login(w http.ResponseWriter, r *http.Request) {
+
+	// set cookie
+	expiration := time.Now()
+	expiration = expiration.AddDate(1, 0, 0)
+	cookie := http.Cookie{Name: "username", Value: "jerry", Expires: expiration}
+	http.SetCookie(nil, &cookie)
+
 	r.ParseForm()
 	fmt.Println("method:", r.Method) //获取请求的方法
 	if r.Method == "GET" {
