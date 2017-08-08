@@ -67,6 +67,9 @@ func checkError(err error) error {
 	return nil
 }
 
+// 最难破解的
+// dk := scrypt.Key([]byte("some password"), []byte(salt), 16384, 8, 1, 32)
+
 func main() {
 
 	fmt.Println("hello world \n")
