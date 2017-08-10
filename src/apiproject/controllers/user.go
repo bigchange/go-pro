@@ -1,5 +1,4 @@
 package controllers
-
 import (
 	"apiproject/models"
 	"encoding/json"
