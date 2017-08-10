@@ -29,7 +29,7 @@ const (
 
 var db *gorp.DbMap
 
-//Init ...
+// Init ...
 func Init() {
 
 	// dbinfo := fmt.Sprintf("tcp:%s:3306*%s/%s/%s",
@@ -57,7 +57,8 @@ func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
 		return nil, err
 	}
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{"InnoDB", "UTF8"}}
-	dbmap.TraceOn("[gorp]", log.New(os.Stdout, "casem:", log.Lmicroseconds)) //Trace database requests
+	dbmap.TraceOn("[gorp]", log.New(os.Stdout, "go-pro:", log.Lmicroseconds)) //Trace database
+	// requests
 	return dbmap, nil
 }
 
