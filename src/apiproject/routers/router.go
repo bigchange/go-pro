@@ -49,7 +49,7 @@ func init() {
 	})
 
 	// 固定路由
-	beego.Router("/api", &controllers.UserController{})
+	beego.Router("/api/user", &controllers.UserController{})
 
 	// 正则路由
 	beego.Router("/api/:id", &controllers.ObjectController{})

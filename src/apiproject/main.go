@@ -11,5 +11,9 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
+
+	beego.SessionConfig{SessionOn:true}
+	beego.AddViewPath("myviewpath")
+
 	beego.Run()
 }
