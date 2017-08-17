@@ -116,7 +116,4 @@ func init() {
 	//注册 namespace
 	beego.AddNamespace(ns1)
 
-
-
-
 }

@@ -8,11 +8,22 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
+	"apiproject/forms"
 )
 
 //  UserInfoController operations for UserInfo
 type UserInfoController struct {
 	beego.Controller
+}
+
+func (c *UserInfoController) Login() {
+
+	var user = forms.UserInfoForm{}
+
+	if err := c.ParseForm(&user); err != nil {
+		beego.BeeLogger.Error("parse form error")
+	}
+
 }
 
 // URLMapping ...
@@ -24,6 +35,9 @@ func (c *UserInfoController) URLMapping() {
 	c.Mapping("Delete", c.Delete)
 }
 
+func (c * UserInfoController) Prepare() {
+	c.EnableXSRF = false
+}
 // Post ...
 // @Title Post
 // @Description create UserInfo
