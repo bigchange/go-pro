@@ -1,6 +1,7 @@
 package main
 
 import (
+	"testing"
 	"bufio"
 	"fmt"
 	"io"
@@ -14,30 +15,12 @@ import (
 	"time"
 
 	"errors"
+
+	"github.com/bigchange/go-pro/myproject/example"
 )
 
-func main() {
-
-	fmt.Println("go hello, world!!")
-	// test()
-	// testFibonacci()
-	// testMethod()
-	// testStringer()
-	// testInterface()
-	// testError()
-	// runThread()
-	// testChannel()
-	// testCloseChannel()
-	// testSelect()
-	// testCrawl()
-	// testDefer()
-	testReflect()
-
-}
-
 // reflect
-
-func testReflect() {
+func TestReflect(t *testing.T) {
 	var x float64 = 3.4
 	fmt.Printf("value is %v \n", x)
 	p := reflect.ValueOf(&x)
