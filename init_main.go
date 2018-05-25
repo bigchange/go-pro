@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io"
+	"flag"
 	"fmt"
 	"net/http"
 	"github.com/gin-gonic/gin"
@@ -34,8 +34,25 @@ func helloHandler(c *gin.Context) {
 	c.JSON(200, "hello world!!")
 }
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func main() {
 	r := gin.Default()
+	var err error 
+	configJsonPath := flag.String("config_json_path", "", "the config.json path")
+	flag.Parse()
+	config := &utils.LLBConfig{DbName: "postgres_test",
+		DbHost: "localhost", DbUser: "postgres", DbPass: "postgres@"}
+	if len(*configJsonPath) > 0 {
+		configData, err := ioutil.ReadFile(*configJsonPath)
+		check(err)
+		err = json.Unmarshal(configData, &config)
+		check(err)
+	}
 	utils.Init()
 	r.Use(CORSMiddleware())
 	db.Init()

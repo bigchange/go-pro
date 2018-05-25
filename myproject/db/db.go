@@ -1,3 +1,9 @@
+/*
+ * @Author: Jerry You 
+ * @CreatedDate: 2018-05-25 16:44:56 
+ * @Last Modified by: Jerry You
+ * @Last Modified time: 2018-05-25 16:45:25
+ */
 package db
 
 import (
@@ -40,6 +46,22 @@ func Init() {
 
 	var err error
 	db, err = ConnectDB(dbinfo)
+	if err != nil {
+		utils.GetLogger().Fatal(err)
+	}
+
+}
+
+//Init ...
+func InitDB(config *utils.LLBConfig) {
+
+	// dbInfo := fmt.Sprintf("user=%s password=%s host=%s port=5432 dbname=%s sslmode=disable", config.DbUser, config.DbPass, config.DbHost, config.DbName)
+	dbInfo := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+		config.DbUser, config.DbPass, config.DbHost, config.DbName)
+
+	// user:password@tcp(localhost:5555)/dbname
+	var err error
+	db, err = ConnectDB(dbInfo)
 	if err != nil {
 		utils.GetLogger().Fatal(err)
 	}
