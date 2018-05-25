@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"flag"
 	"fmt"
 	"net/http"
@@ -30,7 +32,7 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 // handler request
-func helloHandler(c *gin.Context) {
+func helloGinHandler(c *gin.Context) {
 	c.JSON(200, "hello world!!")
 }
 
@@ -42,7 +44,6 @@ func check(e error) {
 
 func main() {
 	r := gin.Default()
-	var err error 
 	configJsonPath := flag.String("config_json_path", "", "the config.json path")
 	flag.Parse()
 	config := &utils.LLBConfig{DbName: "postgres_test",
@@ -59,7 +60,7 @@ func main() {
 
 	apiUser := r.Group("/api/user")
 	{
-		apiUser.GET("/index",helloHandler)
+		apiUser.GET("/index",helloGinHandler)
 	}
 
 	r.LoadHTMLGlob("./public/*.html")
