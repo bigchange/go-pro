@@ -14,8 +14,6 @@ import (
 	"time"
 
 	"errors"
-
-	"./example"
 )
 
 func main() {
