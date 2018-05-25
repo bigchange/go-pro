@@ -5,4 +5,5 @@ type LLBConfig struct {
 	DbHost                 string
 	DbUser                 string
 	DbPass                 string
+	BadgerDir							 string
 }

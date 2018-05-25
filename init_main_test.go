@@ -1,3 +1,11 @@
+/*
+ * @Author: Jerry You 
+ * @CreatedDate: 2018-05-25 17:28:01 
+ * @Last Modified by: Jerry You
+ * @Last Modified time: 2018-05-25 17:34:16
+ * Testxxxx(t **testing.T)
+ * 文件名： xxx_test.go
+ */
 package main
 
 import (
@@ -17,9 +25,16 @@ import (
 	"errors"
 
 	"github.com/bigchange/go-pro/myproject/example"
+	"github.com/bigchange/go-pro/myproject/badgerdb"
 )
 
-// reflect
+
+func TestBadgerDB(t *testing.T) {
+	onfig := &utils.LLBConfig{
+		BadgerDir: "./badger_db"}
+	badgerdb.InitBadgerDB()
+}
+
 func TestReflect(t *testing.T) {
 	var x float64 = 3.4
 	fmt.Printf("value is %v \n", x)
