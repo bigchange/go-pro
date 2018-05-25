@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"fmt"
 	"net/http"
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,11 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
+// handler request
+func helloHandler(c *gin.Context) {
+	c.JSON(200, "hello world!!")
+}
+
 func main() {
 	r := gin.Default()
 	utils.Init()
@@ -36,7 +42,7 @@ func main() {
 
 	apiUser := r.Group("/api/user")
 	{
-
+		apiUser.GET("/index",helloHandler)
 	}
 
 	r.LoadHTMLGlob("./public/*.html")
