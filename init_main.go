@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-
-	"./utils"
 	"github.com/gin-gonic/gin"
+	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/myproject/db"
 )
 
 //CORSMiddleware ...
