@@ -9,6 +9,9 @@
 package main
 
 import (
+	"github.com/dgraph-io/badger"
+	"log"
+	"github.com/bigchange/go-pro/myproject/badgerdb"
 	"testing"
 	"bufio"
 	"fmt"
@@ -23,25 +26,72 @@ import (
 	"time"
 
 	"errors"
-
+  "github.com/bigchange/go-pro/myproject/utils"
 	"github.com/bigchange/go-pro/myproject/example"
-	"github.com/bigchange/go-pro/myproject/badgerdb"
 )
+// command run: go test
+func TestGetBadgerDB(t *testing.T) {
+	// test manage txt by self
+	config := &utils.LLBConfig{
+		BadgerDir: "./data/db"}
+	badgerdb.InitBadgerDB(config)
+	db := badgerdb.GetDB()
+	txn := db.NewTransaction(true)
+	defer db.Close()
+	item, err := txn.Get([]byte("answer"))
+	if err != nil {
+		log.Println("err", err.Error())
+	}
+	val, err := item.Value()
+	if err != nil {
+		log.Println("err", err.Error())
+	}
+	log.Println("get db value:", string(val))
+	defer txn.Discard()
 
-
-func TestBadgerDB(t *testing.T) {
-	onfig := &utils.LLBConfig{
-		BadgerDir: "./badger_db"}
-	badgerdb.InitBadgerDB()
+	err = db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("answer"))
+		if err != nil {
+				return err
+		}
+		val, err := item.Value()
+		if err != nil {
+				return err
+		}
+		fmt.Printf("view value:%s\n", string(val))
+		return nil
+	})
+	if err != nil {
+		log.Println("view error:",err.Error())
+	}
+}
+func TestSetBadgerDB(t *testing.T) {
+	// test manage txt by self
+	config := &utils.LLBConfig{
+		BadgerDir: "./data/db"}
+	badgerdb.InitBadgerDB(config)
+	db := badgerdb.GetDB()
+	txn := db.NewTransaction(true)
+	defer txn.Discard()
+	// Use the transaction...
+	err := txn.Set([]byte("answer"), []byte("42"))
+	if err != nil {
+		return
+	}
+	// Commit the transaction and check for error.
+	if err := txn.Commit(nil); err != nil {
+		return
+	}
+	defer db.Close()
 }
 
 func TestReflect(t *testing.T) {
 	var x float64 = 3.4
-	fmt.Printf("value is %v \n", x)
+	fmt.Printf("Reflect value is %v \n", x)
 	p := reflect.ValueOf(&x)
 	v := p.Elem()
 	v.SetFloat(7.1)
-	fmt.Printf("value is %v \n", x)
+	fmt.Printf("Reflect value is %v \n", x)
 }
 
 // defer
