@@ -5,10 +5,12 @@
  * @Last Modified time: 2018-05-25 17:34:16
  * Testxxxx(t **testing.T)
  * 文件名： xxx_test.go
+ * command run: go test
  */
 package main
 
 import (
+	"encoding/binary"
 	"github.com/dgraph-io/badger"
 	"log"
 	"github.com/bigchange/go-pro/myproject/badgerdb"
@@ -29,12 +31,95 @@ import (
   "github.com/bigchange/go-pro/myproject/utils"
 	"github.com/bigchange/go-pro/myproject/example"
 )
-// command run: go test
-func TestGetBadgerDB(t *testing.T) {
-	// test manage txt by self
+
+func InitDB(t *testing.T) {
 	config := &utils.LLBConfig{
 		BadgerDir: "./data/db"}
 	badgerdb.InitBadgerDB(config)
+} 
+func checkError(msg string, err error) {
+	if err != nil {
+		log.Println(msg ,err.Error())
+	}
+}
+func uint64ToBytes(i uint64) []byte {
+  var buf [8]byte
+  binary.BigEndian.PutUint64(buf[:], i)
+  return buf[:]
+}
+
+func bytesToUint64(b []byte) uint64 {
+  return binary.BigEndian.Uint64(b)
+}
+
+// Merge function to add two uint64 numbers
+func mergerAdd(existing, new []byte) []byte {
+  return uint64ToBytes(bytesToUint64(existing) + bytesToUint64(new))
+}
+func TestMergeOperator(t *testing.T) {
+	InitDB(t)
+	key := "merge"
+	db := badgerdb.GetDB()
+	defer db.Close()
+	err := db.Update(func (txn *badger.Txn) error {
+		err := txn.Set([]byte(key), uint64ToBytes(0))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	checkError("merge set", err)
+	m := db.GetMergeOperator([]byte(key), mergerAdd, 200 * time.Millisecond)
+	defer m.Stop()
+	m.Add(uint64ToBytes(1))
+	m.Add(uint64ToBytes(2))
+	m.Add(uint64ToBytes(3))
+	res, err := m.Get() // res should have value 6 encoded
+	if err != nil {
+		log.Println("MergeOperator error:",err.Error())
+	}
+	log.Println("Merge:", bytesToUint64(res))	
+}
+// command run: go test
+func TestUpdateBadgerDB(t *testing.T) {
+	InitDB(t)
+	db := badgerdb.GetDB()
+	err := db.Update(func (txn *badger.Txn) error {
+		for i := 1; i < 10; i++ {
+			key := fmt.Sprintf("answer%v", i)
+			value := fmt.Sprintf("4%v", i)
+			err := txn.Set([]byte(key), []byte(value))
+			if err != nil {
+				return err
+			}
+		}
+		return nil 
+	})
+	defer db.Close()
+	if err != nil {
+		log.Println("update error:",err.Error())
+	}
+}
+func TestSetBadgerDB(t *testing.T) {
+	// test manage txn by self
+	InitDB(t)
+	db := badgerdb.GetDB()
+	txn := db.NewTransaction(true)
+	defer txn.Discard()
+	// Use the transaction...
+	err := txn.Set([]byte("answer"), []byte("4"))
+	if err != nil {
+		return
+	}
+	// Commit the transaction and check for error.
+	if err := txn.Commit(nil); err != nil {
+		return
+	}
+	defer db.Close()
+}
+func TestGetBadgerDB(t *testing.T) {
+	InitDB(t)
+	// test manage txn by self
 	db := badgerdb.GetDB()
 	txn := db.NewTransaction(true)
 	defer db.Close()
@@ -46,43 +131,27 @@ func TestGetBadgerDB(t *testing.T) {
 	if err != nil {
 		log.Println("err", err.Error())
 	}
-	log.Println("get db value:", string(val))
+	log.Println("get answer value:", string(val))
 	defer txn.Discard()
 
 	err = db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte("answer"))
-		if err != nil {
+		for i := 1; i < 10; i++ {
+			key := fmt.Sprintf("answer%v", i)
+			item, err := txn.Get([]byte(key))
+			if err != nil {
 				return err
-		}
-		val, err := item.Value()
-		if err != nil {
+			}
+			val, err := item.Value()
+			if err != nil {
 				return err
+			}
+			fmt.Printf("key: %s, view value:%s\n", key, string(val))
 		}
-		fmt.Printf("view value:%s\n", string(val))
 		return nil
 	})
 	if err != nil {
 		log.Println("view error:",err.Error())
 	}
-}
-func TestSetBadgerDB(t *testing.T) {
-	// test manage txt by self
-	config := &utils.LLBConfig{
-		BadgerDir: "./data/db"}
-	badgerdb.InitBadgerDB(config)
-	db := badgerdb.GetDB()
-	txn := db.NewTransaction(true)
-	defer txn.Discard()
-	// Use the transaction...
-	err := txn.Set([]byte("answer"), []byte("42"))
-	if err != nil {
-		return
-	}
-	// Commit the transaction and check for error.
-	if err := txn.Commit(nil); err != nil {
-		return
-	}
-	defer db.Close()
 }
 
 func TestReflect(t *testing.T) {
