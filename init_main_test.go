@@ -10,7 +10,8 @@
 package main
 
 import (
-	"encoding/binary"
+	"strconv"
+	// "encoding/binary"
 	"github.com/dgraph-io/badger"
 	"log"
 	"github.com/bigchange/go-pro/myproject/badgerdb"
@@ -39,51 +40,30 @@ func InitDB(t *testing.T) {
 } 
 func checkError(msg string, err error) {
 	if err != nil {
-		log.Println(msg ,err.Error())
+		log.Println(msg , err.Error())
 	}
 }
-func uint64ToBytes(i uint64) []byte {
-  var buf [8]byte
-  binary.BigEndian.PutUint64(buf[:], i)
-  return buf[:]
+func int64ToBytes(i int64) []byte {
+  return []byte(string(strconv.FormatInt(i,10)))
 }
 
-func bytesToUint64(b []byte) uint64 {
-  return binary.BigEndian.Uint64(b)
+func bytesToInt64(b []byte) int64 {
+	res,_ := strconv.ParseInt(string(b), 10, 64)
+	return  res
 }
 
 // Merge function to add two uint64 numbers
-func mergerAdd(existing, new []byte) []byte {
-  return uint64ToBytes(bytesToUint64(existing) + bytesToUint64(new))
-}
-func TestMergeOperator(t *testing.T) {
-	InitDB(t)
-	key := "merge"
-	db := badgerdb.GetDB()
-	defer db.Close()
-	err := db.Update(func (txn *badger.Txn) error {
-		err := txn.Set([]byte(key), uint64ToBytes(0))
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	checkError("merge set", err)
-	m := db.GetMergeOperator([]byte(key), mergerAdd, 200 * time.Millisecond)
-	defer m.Stop()
-	m.Add(uint64ToBytes(1))
-	m.Add(uint64ToBytes(2))
-	m.Add(uint64ToBytes(3))
-	res, err := m.Get() // res should have value 6 encoded
-	if err != nil {
-		log.Println("MergeOperator error:",err.Error())
-	}
-	log.Println("Merge:", bytesToUint64(res))	
+func addIntValue(existing, new []byte) []byte {
+	existInt, _ := strconv.ParseInt(string(existing), 10, 64)
+	newInt, _ := strconv.ParseInt(string(new), 10, 64)
+	ret := strconv.FormatInt(existInt + newInt, 10)
+  return []byte(ret)
 }
 // command run: go test
 func TestUpdateBadgerDB(t *testing.T) {
 	InitDB(t)
 	db := badgerdb.GetDB()
+	defer db.Close()
 	err := db.Update(func (txn *badger.Txn) error {
 		for i := 1; i < 10; i++ {
 			key := fmt.Sprintf("answer%v", i)
@@ -95,9 +75,25 @@ func TestUpdateBadgerDB(t *testing.T) {
 		}
 		return nil 
 	})
-	defer db.Close()
-	if err != nil {
-		log.Println("update error:",err.Error())
+	checkError("update error", err)
+}
+
+func SetDBValue(key string, value interface{},	txn *badger.Txn) {
+	// Use the transaction...
+	if val, ok := value.(string);ok {
+		err := txn.Set([]byte(key), []byte(val))
+		if err != nil {
+			return
+		} else {
+			log.Println("set key:", key, ",db value:", value)
+		}
+	} else if val, ok := value.(int64);ok {
+		err := txn.Set([]byte(key), int64ToBytes(val))
+		if err != nil {
+			return
+		} else {
+			fmt.Printf("set key: %s, value:%v, con:%v\n", key, value, bytesToInt64(uint64ToBytes(val)))
+		}
 	}
 }
 func TestSetBadgerDB(t *testing.T) {
@@ -106,16 +102,26 @@ func TestSetBadgerDB(t *testing.T) {
 	db := badgerdb.GetDB()
 	txn := db.NewTransaction(true)
 	defer txn.Discard()
-	// Use the transaction...
-	err := txn.Set([]byte("answer"), []byte("4"))
-	if err != nil {
-		return
-	}
+	defer db.Close()
+	// var v2 uint64 = 0
+	SetDBValue("answer", strconv.FormatUint(40,10), txn)
+	SetDBValue("answers", "4", txn)
+	SetDBValue("merge", strconv.FormatUint(100,10), txn)
 	// Commit the transaction and check for error.
 	if err := txn.Commit(nil); err != nil {
+		checkError("commit error", err)
 		return
 	}
-	defer db.Close()
+}
+
+func GetDBValue(key string, txn *badger.Txn) {
+	item, err := txn.Get([]byte(key))
+	if err != nil {
+		log.Println("err", err.Error())
+	}
+	val, err := item.Value()
+	checkError("get error", err)
+	fmt.Printf("get key: %s, value:%s\n", key, string(val))
 }
 func TestGetBadgerDB(t *testing.T) {
 	InitDB(t)
@@ -123,18 +129,12 @@ func TestGetBadgerDB(t *testing.T) {
 	db := badgerdb.GetDB()
 	txn := db.NewTransaction(true)
 	defer db.Close()
-	item, err := txn.Get([]byte("answer"))
-	if err != nil {
-		log.Println("err", err.Error())
-	}
-	val, err := item.Value()
-	if err != nil {
-		log.Println("err", err.Error())
-	}
-	log.Println("get answer value:", string(val))
 	defer txn.Discard()
-
-	err = db.View(func(txn *badger.Txn) error {
+	GetDBValue("answer", txn)
+	GetDBValue("answers", txn)
+	GetDBValue("merge", txn)
+	GetDBValue("answer1", txn)
+	err := db.View(func(txn *badger.Txn) error {
 		for i := 1; i < 10; i++ {
 			key := fmt.Sprintf("answer%v", i)
 			item, err := txn.Get([]byte(key))
@@ -149,8 +149,26 @@ func TestGetBadgerDB(t *testing.T) {
 		}
 		return nil
 	})
+	checkError("view error", err)
+}
+
+// confuse mergerOperator
+func TestMergeOperator(t *testing.T) {
+	InitDB(t)
+	key := "answer"
+	db := badgerdb.GetDB()
+	m := db.GetMergeOperator([]byte(key), addIntValue, 2000 * time.Millisecond)
+	defer m.Stop()
+	m.Add([]byte("1"))
+	m.Add([]byte("2"))
+	m.Add([]byte("3"))
+	res, err := m.Get()
 	if err != nil {
-		log.Println("view error:",err.Error())
+		log.Println("MergeOperator error:",err.Error())
+		return
+	} else {
+		result, _ := strconv.ParseUint(string(res), 10, 64)
+		log.Println("Merge:", result)	
 	}
 }
 

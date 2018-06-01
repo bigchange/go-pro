@@ -8,10 +8,16 @@ import (
 
 var logger *logging.Logger
 
+func init() {
+	logger = logging.MustGetLogger("case-go")
+}
+
 func Init() error {
 	logger = logging.MustGetLogger("case-go")
 	return nil
 }
+
+
 
 func GetLogger() *logging.Logger {
 	return logger
