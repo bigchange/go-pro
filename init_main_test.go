@@ -92,7 +92,7 @@ func SetDBValue(key string, value interface{},	txn *badger.Txn) {
 		if err != nil {
 			return
 		} else {
-			fmt.Printf("set key: %s, value:%v, con:%v\n", key, value, bytesToInt64(uint64ToBytes(val)))
+			fmt.Printf("set key: %s, value:%v, con:%v\n", key, value, bytesToInt64(int64ToBytes(val)))
 		}
 	}
 }

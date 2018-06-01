@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"context"
+	"github.com/bigchange/go-pro/myproject/clients"
 	"encoding/json"
 	"io/ioutil"
 	"flag"
@@ -8,7 +11,7 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/bigchange/go-pro/myproject/utils"
-	"github.com/bigchange/go-pro/myproject/db"
+	// "github.com/bigchange/go-pro/myproject/db"
 )
 
 //CORSMiddleware ...
@@ -42,6 +45,32 @@ func check(e error) {
 	}
 }
 
+func DgraphClient() {
+	dclient, err := clients.NewDClient("172.20.0.14:9080")
+	err = dclient.Dial()
+	if err != nil {
+		utils.GetLogger().Criticalf("can't create dgraph client")
+	}
+	utils.GetLogger().Info("create dgraph client success")
+	
+	query := `{
+		query(func: uid(0x3981026)) {
+			name
+			uid
+			candidate_company {
+				name
+				uid
+			}
+ 		}
+	}`
+	ctx := context.Background()
+	resp, err := dclient.Stub.NewTxn().Query(ctx, query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("resp:", resp)
+}
+
 func main() {
 	r := gin.Default()
 	configJsonPath := flag.String("config_json_path", "", "the config.json path")
@@ -56,7 +85,9 @@ func main() {
 	}
 	utils.Init()
 	r.Use(CORSMiddleware())
-	db.Init()
+	// db.Init()
+
+	DgraphClient()
 
 	apiUser := r.Group("/api/user")
 	{

@@ -7,6 +7,7 @@
 package clients
 
 import (
+	"log"
 	"google.golang.org/grpc"
 	"github.com/bgfurfeature/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -36,22 +37,24 @@ func NewDClient(address ...string) (client *DClient, err error) {
 }
 
 func (client DClient) Dial()(err error) {
+	log.Println("address length:", len(client.Address))
 	var size = len(client.Address)
 	var dc = make([]api.DgraphClient, len(client.Address))
-	for i:=0; i < size; i++ {
+	for i := 0; i < size; i++ {
 		conn, err := grpc.Dial(client.Address[i], grpc.WithInsecure())
-		if err != nil {
-			return err
-		}
 		client.Conns[i] = conn
 		dc[i] = api.NewDgraphClient(client.Conns[i])
+		if err != nil {
+			log.Fatal("While trying to dial gRPC")
+			return err
+		}
 	}
 	client.Stub = dgo.NewDgraphClients(dc)
 	return nil
 }
-func (client *DClient) Close() {
+func (client DClient) Close() {
 	for _, conn := range client.Conns {
-		conn.Close()
+		defer conn.Close()
 	}
 }
 
