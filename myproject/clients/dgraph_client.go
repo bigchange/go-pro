@@ -17,26 +17,23 @@ import (
 type DClient struct {
 	Conns	[]*grpc.ClientConn
 	Address	[]string
-	Stub *dgo.Dgraph
 }
 
 func NewDClients(address []string) (client *DClient, err error) {
 	client = &DClient{
 		Conns: make([]*grpc.ClientConn, len(address)), 
-		Address: address, 
-		Stub: nil}
+		Address: address}
 	return client, nil
 }
 
 func NewDClient(address ...string) (client *DClient, err error) {
 	client = &DClient{
 		Conns: make([]*grpc.ClientConn, len(address)), 
-		Address: address, 
-		Stub: nil}
+		Address: address}
 	return client, nil
 }
 
-func (client DClient) Dial()(err error) {
+func (client DClient) Dial()(dg *dgo.Dgraph, err error) {
 	log.Println("address length:", len(client.Address))
 	var size = len(client.Address)
 	var dc = make([]api.DgraphClient, len(client.Address))
@@ -46,15 +43,16 @@ func (client DClient) Dial()(err error) {
 		dc[i] = api.NewDgraphClient(client.Conns[i])
 		if err != nil {
 			log.Fatal("While trying to dial gRPC")
-			return err
+			return nil, err
 		}
 	}
-	client.Stub = dgo.NewDgraphClients(dc)
-	return nil
+	dg = dgo.NewDgraphClients(dc)
+	return dg, nil
 }
 func (client DClient) Close() {
-	for _, conn := range client.Conns {
-		defer conn.Close()
+	size := len(client.Conns)
+	for i := 0; i < size; i++ {
+		defer client.Conns[i].Close()
 	}
 }
 
