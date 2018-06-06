@@ -19,7 +19,7 @@ func TestQuaryVars(t *testing.T) {
 	}
 	utils.GetLogger().Info("create dgraph client success")
 	defer dclient.Close()
-	query := `query($a: string) {
+	query := `query candidate($a: string) {
 		candidate(func: uid($a)) {
 			name
 			uid
@@ -31,7 +31,7 @@ func TestQuaryVars(t *testing.T) {
 	}`
 	variables := make(map[string]string)
 	variables["$a"] = "0x3"
-	resp, err := dg.NewTxn().QueryWithVars(context.Background(),query, variables)
+	resp, err := dg.NewTxn().QueryWithVars(context.Background(),query,variables)
 	if err != nil {
 		log.Fatal(err)
 	}
