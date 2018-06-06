@@ -10,6 +10,34 @@ import (
 	"github.com/bigchange/go-pro/myproject/clients"
 	"testing"
 )
+
+func TestQuaryVars(t *testing.T) {
+	dclient, err := clients.NewDClients([]string{"127.0.0.1:9080"})
+	dg, err := dclient.Dial()
+	if err != nil {
+		utils.GetLogger().Criticalf("can't create dgraph client")
+	}
+	utils.GetLogger().Info("create dgraph client success")
+	defer dclient.Close()
+	query := `query($a: string) {
+		candidate(func: uid($a)) {
+			name
+			uid
+			candidate_company {
+				name
+				uid
+			}
+ 		}
+	}`
+	variables := make(map[string]string)
+	variables["$a"] = "0x3"
+	resp, err := dg.NewTxn().QueryWithVars(context.Background(),query, variables)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("resp:", resp)
+
+}
 // PASS
 func TestDgraphClient(t *testing.T) {
 	conn, err := grpc.Dial("127.0.0.1:9080", grpc.WithInsecure())
@@ -20,7 +48,7 @@ func TestDgraphClient(t *testing.T) {
 	dc := api.NewDgraphClient(conn)
 	dg := dgo.NewDgraphClient(dc)
 	query := `{
-		query(func: uid(0x3981026)) {
+		query(func: uid(0x3)) {
 			name
 			uid
 			candidate_company {
@@ -44,9 +72,9 @@ func DgraphClient() {
 		utils.GetLogger().Criticalf("can't create dgraph client")
 	}
 	utils.GetLogger().Info("create dgraph client success")
-	
+	defer dclient.Close()
 	query := `{
-		query(func: uid(0x3981026)) {
+		query(func: uid(0x3)) {
 			name
 			uid
 			candidate_company {
