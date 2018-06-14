@@ -16,7 +16,7 @@ func TestLevelDB(t *testing.T) {
 	if err == nil {
 		fmt.Println("get data:", string(data))
 	} else {
-		fmt.Println("get data error", err.Error())
+		fmt.Println("get data error:", err.Error())
 	}
 	err = db.Put([]byte("key"), []byte("value"), nil)
 	data, err = db.Get([]byte("key"), nil)
