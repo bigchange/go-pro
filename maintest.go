@@ -35,7 +35,7 @@ import (
 )
 
 func main()  {
-	ldb.TestLevelDB(nil)
+	ldb.TestBatchWrite()
 }
 
 func InitDB(t *testing.T) {
