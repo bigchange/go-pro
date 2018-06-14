@@ -30,12 +30,12 @@ import (
 
 	"errors"
 	"github.com/bigchange/go-pro/myproject/utils"
-	"github.com/bigchange/go-pro/myproject/leveldb"
+	ldb "github.com/bigchange/go-pro/myproject/leveldb"
 	"github.com/bigchange/go-pro/myproject/example"
 )
 
 func main()  {
-	leveldb.TestLevelDB(nil)
+	ldb.TestLevelDB(nil)
 }
 
 func InitDB(t *testing.T) {
