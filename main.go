@@ -71,7 +71,7 @@ func DgraphClient() {
 	log.Println("resp:", resp)
 }
 
-func main() {
+func GinInit() {
 	r := gin.Default()
 	configJsonPath := flag.String("config_json_path", "", "the config.json path")
 	flag.Parse()
@@ -107,4 +107,7 @@ func main() {
 	})
 
 	r.Run(":20989")
+}
+
+func main() {
 }

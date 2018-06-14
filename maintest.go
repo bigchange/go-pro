@@ -29,9 +29,14 @@ import (
 	"time"
 
 	"errors"
-  "github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/myproject/gotest"
 	"github.com/bigchange/go-pro/myproject/example"
 )
+
+func main()  {
+	gotest.TestLevelDB(nil)
+}
 
 func InitDB(t *testing.T) {
 	config := &utils.LLBConfig{
