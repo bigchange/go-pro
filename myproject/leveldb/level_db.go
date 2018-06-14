@@ -37,7 +37,7 @@ func TestBatchWrite() {
 	}
 
 	value, err := Get(db, int64ToBytes(1))
-	utils.GetLogger().Infof("Key: %v, value:%v", 1, value)
+	utils.GetLogger().Infof("Key: %v, value:%v", 1, string(value))
 }
 
 func Put(db *leveldb.DB, key []byte, value []byte) (err error) {
