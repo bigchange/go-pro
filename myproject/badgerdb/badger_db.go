@@ -1,3 +1,4 @@
+// Package badgerdb provides the usage of init badger db
 package badgerdb
 
 
@@ -8,7 +9,7 @@ import (
 )
 
 var db *badger.DB
-
+// InitBadgerDB init badger db instance 
 func InitBadgerDB(config *utils.LLBConfig) {
 	// Open the Badger database located in the specific directory.
   // It will be created if it doesn't exist.
@@ -22,6 +23,7 @@ func InitBadgerDB(config *utils.LLBConfig) {
 	  log.Printf("open db error:", err.Error())
 	}
 }
+// GetDB provide a way to get a initial db instance
 func GetDB() *badger.DB {
 	return db
 }
