@@ -30,15 +30,45 @@ import (
 
 	"errors"
 	"github.com/bigchange/go-pro/myproject/utils"
-	ldb "github.com/bigchange/go-pro/myproject/leveldb"
+	// ldb "github.com/bigchange/go-pro/myproject/leveldb"
 	"github.com/bigchange/go-pro/myproject/example"
+	"math/rand"
 )
 
-func main()  {
-	ldb.TestBatchWrite()
+func TestSpeed() {
+	InitDB()
+	db := badgerdb.GetDB()
+	defer db.Close()
+	start:=(time.Now().Unix())
+	var total=1000000
+	var sst string
+	for i := 0; i < 57; i++ {
+		sst+="v"
+	}
+	addcount:=0
+	for i:=0; i < total;i++ {
+		err := db.Update(func(txn *badger.Txn) error {
+			return txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst))
+		})
+		if err!=nil {
+			println(err.Error())
+		}
+		addcount++
+	}
+
+	println(addcount)
+	stop:= time.Now().Unix()
+	println(stop-start)
+
 }
 
-func InitDB(t *testing.T) {
+func main()  {
+	// ldb.TestBatchWrite()
+	// rdb.TestRocksDB()
+	TestSpeed()
+}
+
+func InitDB() {
 	config := &utils.LLBConfig{
 		BadgerDir: "./data/db"}
 	badgerdb.InitBadgerDB(config)
@@ -66,7 +96,7 @@ func addIntValue(existing, new []byte) []byte {
 }
 // command run: go test
 func TestUpdateBadgerDB(t *testing.T) {
-	InitDB(t)
+	InitDB()
 	db := badgerdb.GetDB()
 	defer db.Close()
 	err := db.Update(func (txn *badger.Txn) error {
@@ -103,7 +133,7 @@ func SetDBValue(key string, value interface{},	txn *badger.Txn) {
 }
 func TestSetBadgerDB(t *testing.T) {
 	// test manage txn by self
-	InitDB(t)
+	InitDB()
 	db := badgerdb.GetDB()
 	txn := db.NewTransaction(true)
 	defer txn.Discard()
@@ -129,7 +159,7 @@ func GetDBValue(key string, txn *badger.Txn) {
 	fmt.Printf("get key: %s, value:%s\n", key, string(val))
 }
 func TestGetBadgerDB(t *testing.T) {
-	InitDB(t)
+	InitDB()
 	// test manage txn by self
 	db := badgerdb.GetDB()
 	txn := db.NewTransaction(true)
@@ -159,7 +189,7 @@ func TestGetBadgerDB(t *testing.T) {
 
 // confuse mergerOperator
 func TestMergeOperator(t *testing.T) {
-	InitDB(t)
+	InitDB()
 	key := "answer"
 	db := badgerdb.GetDB()
 	m := db.GetMergeOperator([]byte(key), addIntValue, 2000 * time.Millisecond)
