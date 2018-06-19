@@ -59,13 +59,13 @@ func TestSpeed() {
 			txn = db.NewTransaction(true)
 			batch = 0
 		}
-		if batch > 0 {
-			err := txn.Commit(nil)
-			if err!= nil {
-				println("2 error:" + err.Error())
-			}
-		}
 		addcount++
+	}
+	if batch > 0 {
+		err := txn.Commit(nil)
+		if err!= nil {
+			println("2 error:" + err.Error())
+		}
 	}
 	println(addcount)
 	stop:= time.Now().Unix()
