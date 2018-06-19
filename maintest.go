@@ -46,12 +46,24 @@ func TestSpeed() {
 		sst+="v"
 	}
 	addcount:=0
+	txn := db.NewTransaction(true)
+	batch := 0
 	for i:=0; i < total;i++ {
-		err := db.Update(func(txn *badger.Txn) error {
-			return txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst))
-		})
-		if err!=nil {
-			println(err.Error())
+		batch = batch + 1
+		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst)) {
+		if batch >= 100 {
+			err := txn.Commit(nil)
+			if err!= nil {
+				println("error:" + err.Error())
+			}
+			txn = db.NewTransaction(true)
+			batch = 0
+		}
+		if batch > 0 {
+			err := txn.Commit(nil)
+			if err!= nil {
+				println("error:" + err.Error())
+			}
 		}
 		addcount++
 	}
