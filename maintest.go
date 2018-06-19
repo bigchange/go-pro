@@ -50,11 +50,11 @@ func TestSpeed() {
 	batch := 0
 	for i:=0; i < total;i++ {
 		batch = batch + 1
-		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst)) {
+		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst))
 		if batch >= 100 {
 			err := txn.Commit(nil)
 			if err!= nil {
-				println("error:" + err.Error())
+				println("1 error:" + err.Error())
 			}
 			txn = db.NewTransaction(true)
 			batch = 0
@@ -62,16 +62,14 @@ func TestSpeed() {
 		if batch > 0 {
 			err := txn.Commit(nil)
 			if err!= nil {
-				println("error:" + err.Error())
+				println("2 error:" + err.Error())
 			}
 		}
 		addcount++
 	}
-
 	println(addcount)
 	stop:= time.Now().Unix()
 	println(stop-start)
-
 }
 
 func main()  {
