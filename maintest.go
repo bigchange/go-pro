@@ -51,7 +51,7 @@ func TestSpeed() {
 	for i:=0; i < total;i++ {
 		batch = batch + 1
 		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst))
-		if batch >= 100 {
+		if batch >= 10000 {
 			err := txn.Commit(nil)
 			if err!= nil {
 				println("1 error:" + err.Error())
