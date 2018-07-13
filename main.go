@@ -1,16 +1,16 @@
 package main
 
 import (
-	"log"
-	"context"
-	"github.com/bigchange/go-pro/myproject/clients"
 	"encoding/json"
-	"io/ioutil"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"github.com/gin-gonic/gin"
+	"time"
+
+	"github.com/bigchange/go-pro/myproject/jwt"
 	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/gin-gonic/gin"
 	// "github.com/bigchange/go-pro/myproject/db"
 )
 
@@ -45,32 +45,7 @@ func check(e error) {
 	}
 }
 
-func DgraphClient() {
-	dclient, err := clients.NewDClient("172.20.0.14:9080")
-	err = dclient.Dial()
-	if err != nil {
-		utils.GetLogger().Criticalf("can't create dgraph client")
-	}
-	utils.GetLogger().Info("create dgraph client success")
-	
-	query := `{
-		query(func: uid(0x3981026)) {
-			name
-			uid
-			candidate_company {
-				name
-				uid
-			}
- 		}
-	}`
-	ctx := context.Background()
-	resp, err := dclient.Stub.NewTxn().Query(ctx, query)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("resp:", resp)
-}
-
+// Gin Web FrameWork
 func GinInit() {
 	r := gin.Default()
 	configJsonPath := flag.String("config_json_path", "", "the config.json path")
@@ -84,14 +59,59 @@ func GinInit() {
 		check(err)
 	}
 	utils.Init()
-	r.Use(CORSMiddleware())
-	// db.Init()
+	// the jwt middleware
+	authMiddleware := &jwt.GinJWTMiddleware{
+		Realm:      "casem zone",
+		Key:        []byte("this is casemind go api"),
+		Timeout:    time.Hour,
+		MaxRefresh: time.Hour,
+		Authenticator: func(userName string, password string, c *gin.Context) (string, bool) {
+			/**
+			user, err := userModel.SigninEx(userName, password)
+			if err != nil {
+				return "", false
+			}
+			return strconv.Itoa(user.ID), true
+			*/
+			return "", false
+		},
+		Authorizator: func(userId string, c *gin.Context) bool {
+			return true
+		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
+		},
+		// TokenLookup is a string in the form of "<source>:<name>" that is used
+		// to extract token from the request.
+		// Optional. Default value "header:Authorization".
+		// Possible values:
+		// - "header:<name>"
+		// - "query:<name>"
+		// - "cookie:<name>"
+		TokenLookup: "header:Authorization",
+		// TokenLookup: "query:token",
+		// TokenLookup: "cookie:token",
 
-	DgraphClient()
+		// TokenHeadName is a string in the header. Default value is "Bearer"
+		TokenHeadName: "Token",
+
+		// TimeFunc provides the current time. You can override it to use another time value. This is useful for testing or if your server uses a different time zone than your tokens.
+		TimeFunc: time.Now,
+	}
+	r.Use(CORSMiddleware())
+	r.POST("/api/login", authMiddleware.LoginHandler)
+	apiAuth := r.Group("/api/auth")
+	apiAuth.Use(authMiddleware.MiddlewareFunc())
+	apiAuth.GET("/refresh_token", authMiddleware.RefreshHandler)
+
+	// db.Init()
 
 	apiUser := r.Group("/api/user")
 	{
-		apiUser.GET("/index",helloGinHandler)
+		apiUser.GET("/index", helloGinHandler)
 	}
 
 	r.LoadHTMLGlob("./public/*.html")
