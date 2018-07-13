@@ -1,12 +1,4 @@
-/*
- * @Author: Jerry You 
- * @CreatedDate: 2018-05-25 17:28:01 
- * @Last Modified by: Jerry You
- * @Last Modified time: 2018-05-25 17:34:16
- * Testxxxx(t **testing.T)
- * 文件名： xxx_test.go
- * command run: go test
- */
+
 package main
 
 import (
