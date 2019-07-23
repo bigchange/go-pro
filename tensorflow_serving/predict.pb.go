@@ -6,7 +6,8 @@ package tensorflow_serving
 import (
 	fmt "fmt"
 	math "math"
-	proto1 "tensorflow"
+
+	proto1 "github.com/bigchange/go-pro/tensorflow"
 
 	proto "github.com/golang/protobuf/proto"
 )
