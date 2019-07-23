@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	tensorflow_proto "github.com/bigchange/go-pro/tensorflow"
+	tensorflow_serving_proto "github.com/bigchange/go-pro/tensorflow_serving"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 )
 
@@ -146,4 +148,52 @@ func TfModelLoadAndEval_imdb_model() {
 		predict[i] = value[i][0]
 	}
 	fmt.Printf("predict value:%v", predict)
+}
+
+func TfApiTesting() {
+	dropOut := tensorflow_proto.TensorProto{}
+	const MAXLEN int = 20
+	inputData := [2][MAXLEN]float32{{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0}, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0}}
+	tensor, _ := tf.NewTensor(inputData)
+	dropOutTensor, _ := tf.NewTensor(false)
+	tensorByte, ok := tensor.Value().([]byte)
+	if !ok {
+		fmt.Println("Cannot type assert tensor value to ")
+		return
+	}
+	request := tensorflow_serving_proto.PredictRequest{
+		&tensorflow_serving_proto.ModelSpec{
+			Name:          "test",
+			SignatureName: "test_sign",
+		},
+		Inputs:map[string]*tensorflow_proto.TensorProto{
+			"input_layer_input":&tensorflow_proto.TensorProto{
+				DataType: &tensorflow_proto.DataType_DT_INT32,
+				TensorShape: &tensorflow_serving_proto.TensorShapeProto{
+					Dim:[]*tensorflow_proto.TensorShapeProto_Dim {
+						&tensorflow_proto.TensorShapeProto_Dim{
+							Size: 2,
+						},
+						&tensorflow_proto.TensorShapeProto_Dim{
+							Size: 20,
+						},
+					}
+				},
+			},
+			"dropout_layer1/keras_learning_phase":&tensorflow_proto.TensorProto{
+				DataType: &tensorflow_proto.DataType_DT_BOOL,
+				TensorShape: &tensorflow_serving_proto.TensorShapeProto{
+					Dim:[]*tensorflow_proto.TensorShapeProto_Dim {
+						&tensorflow_proto.TensorShapeProto_Dim{
+							Size: 1,
+						},
+					}
+				},
+				BoolVal:[]bool{false},
+			},
+		},
+		OutputFilter: []string{"output_layer/Sigmoid"},
+	}
+	fmt.Println("convert to tensorProto:", request)
+
 }
