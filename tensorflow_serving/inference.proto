@@ -12,10 +12,10 @@ syntax = "proto3";
 
 option cc_enable_arenas = true;
 
-import "tensorflow_serving/classification.proto";
-import "tensorflow_serving/input.proto";
-import "tensorflow_serving/model.proto";
-import "tensorflow_serving/regression.proto";
+import "github.com/bigchange/go-pro/tensorflow_serving/classification.proto";
+import "github.com/bigchange/go-pro/tensorflow_serving/input.proto";
+import "github.com/bigchange/go-pro/tensorflow_serving/model.proto";
+import "github.com/bigchange/go-pro/tensorflow_serving/regression.proto";
 
 package tensorflow.serving;
 

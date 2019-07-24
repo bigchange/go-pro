@@ -2,7 +2,7 @@
 // model training or inference.
 syntax = "proto3";
 
-import "tensorflow/feature.proto";
+import "github.com/bigchange/go-pro/tensorflow/feature.proto";
 option go_package = "tensorflow";
 package tensorflow;
 

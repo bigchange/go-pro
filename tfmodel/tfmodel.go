@@ -151,45 +151,45 @@ func TfModelLoadAndEval_imdb_model() {
 }
 
 func TfApiTesting() {
-	dropOut := tensorflow_proto.TensorProto{}
 	const MAXLEN int = 20
-	inputData := [2][MAXLEN]float32{{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0}, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0}}
+	inputData := []float32{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 208.0, 659.0, 180.0, 408.0, 42.0, 547.0, 829.0, 285.0, 334.0, 42.0, 642.0, 81.0, 800.0}
 	tensor, _ := tf.NewTensor(inputData)
-	dropOutTensor, _ := tf.NewTensor(false)
-	tensorByte, ok := tensor.Value().([]byte)
+	// dropOutTensor, _ := tf.NewTensor(false)
+	tensorByte, ok := tensor.Value()
 	if !ok {
 		fmt.Println("Cannot type assert tensor value to ")
 		return
 	}
 	request := tensorflow_serving_proto.PredictRequest{
-		&tensorflow_serving_proto.ModelSpec{
+		ModelSpec: &tensorflow_serving_proto.ModelSpec{
 			Name:          "test",
 			SignatureName: "test_sign",
 		},
-		Inputs:map[string]*tensorflow_proto.TensorProto{
-			"input_layer_input":&tensorflow_proto.TensorProto{
-				DataType: &tensorflow_proto.DataType_DT_INT32,
-				TensorShape: &tensorflow_serving_proto.TensorShapeProto{
-					Dim:[]*tensorflow_proto.TensorShapeProto_Dim {
+		Inputs: map[string]*tensorflow_proto.TensorProto{
+			"input_layer_input": &tensorflow_proto.TensorProto{
+				Dtype: tensorflow_proto.DataType_DT_INT32,
+				TensorShape: &tensorflow_proto.TensorShapeProto{
+					Dim: []*tensorflow_proto.TensorShapeProto_Dim{
 						&tensorflow_proto.TensorShapeProto_Dim{
 							Size: 2,
 						},
 						&tensorflow_proto.TensorShapeProto_Dim{
 							Size: 20,
 						},
-					}
+					},
 				},
+				FloatVal: inputData,
 			},
-			"dropout_layer1/keras_learning_phase":&tensorflow_proto.TensorProto{
-				DataType: &tensorflow_proto.DataType_DT_BOOL,
-				TensorShape: &tensorflow_serving_proto.TensorShapeProto{
-					Dim:[]*tensorflow_proto.TensorShapeProto_Dim {
+			"dropout_layer1/keras_learning_phase": &tensorflow_proto.TensorProto{
+				Dtype: tensorflow_proto.DataType_DT_BOOL,
+				TensorShape: &tensorflow_proto.TensorShapeProto{
+					Dim: []*tensorflow_proto.TensorShapeProto_Dim{
 						&tensorflow_proto.TensorShapeProto_Dim{
 							Size: 1,
 						},
-					}
+					},
 				},
-				BoolVal:[]bool{false},
+				BoolVal: []bool{false},
 			},
 		},
 		OutputFilter: []string{"output_layer/Sigmoid"},

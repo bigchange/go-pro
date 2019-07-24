@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 package tensorflow;
-import "tensorflow/resource_handle.proto";
-import "tensorflow/tensor_shape.proto";
-import "tensorflow/types.proto";
+import "github.com/bigchange/go-pro/tensorflow/resource_handle.proto";
+import "github.com/bigchange/go-pro/tensorflow/tensor_shape.proto";
+import "github.com/bigchange/go-pro/tensorflow/types.proto";
 
 // Protocol buffer representing a tensor.
 message TensorProto {
