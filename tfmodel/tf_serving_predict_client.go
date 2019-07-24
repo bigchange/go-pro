@@ -1,6 +1,7 @@
 package tfmodel
 
 import (
+	"context"
 	"errors"
 	"reflect"
 
@@ -38,20 +39,47 @@ func (client *PredictionServiceClient) Close() {
 	client.Conn.Close()
 }
 
-func (client *PredictionServiceClient) Predict(modelName string, modelVersion int64, tensorNames []string, dataTypes []framework.DataType, tensors [][]interface{}) (out *pb.PredictResponse, err error) {
-	pr := newPredictRequest(modelName, modelVersion)
+// Note: all input tensors should be converted to 1D arry, for exampel: if you have a tensor [30,40], pls converted to [30 * 40] with specified tensor dim defineed in tensor_shape
+func (client *PredictionServiceClient) Predict(modelName string, signatureName string, modelVersion int64, tensorNames []string, dataTypes []framework.DataType, tensors []interface{}, shapeSizes [][]int64, shapeNames [][]string, outputNames []string) (out *pb.PredictResponse, err error) {
+	err = client.Dial()
+	if err != nil {
+		return out, err
+	}
+	defer client.Close()
 	if len(tensorNames) == len(dataTypes) && len(tensorNames) == len(tensors) {
-		//
+		var pr *pb.PredictRequest
+		pr = newPredictRequest(modelName, signatureName, modelVersion)
+		// fmt.Println("pr new :", pr)
+		for i, tensorName := range tensorNames {
+			if shapeNames == nil {
+				tensorProto, err := addInput(tensorName, dataTypes[i], tensors[i], shapeSizes[i], nil)
+				if err != nil {
+					return out, err
+				}
+				pr.Inputs[tensorName] = tensorProto
+			} else {
+				tensorProto, err := addInput(tensorName, dataTypes[i], tensors[i], shapeSizes[i], shapeNames[i])
+				if err != nil {
+					return out, err
+				}
+				pr.Inputs[tensorName] = tensorProto
+			}
+			// fmt.Println("tensorName:", tensorName, ",pr addInput:", pr)
+		}
+
+		// fmt.Println("pr final:", pr)
+		out, err = client.Stub.Predict(context.Background(), pr)
 	} else {
-		return out, errors.New("Inputs parameters length not match ")
+		return out, errors.New("Inputs parameters length not match !!")
 	}
 	return out, err
 }
 
-func newPredictRequest(modelName string, modelVersion int64) (pr *pb.PredictRequest) {
+func newPredictRequest(modelName string, signatureName string, modelVersion int64) (pr *pb.PredictRequest) {
 	return &pb.PredictRequest{
 		ModelSpec: &pb.ModelSpec{
-			Name: modelName,
+			Name:          modelName,
+			SignatureName: signatureName,
 			VersionChoice: &pb.ModelSpec_Version{
 				Version: &google_protobuf.Int64Value{
 					Value: modelVersion,
@@ -63,14 +91,14 @@ func newPredictRequest(modelName string, modelVersion int64) (pr *pb.PredictRequ
 }
 
 // if tensor is one dim, shapeSize is nil
-func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataType, tensor interface{},
-	shapeSize []int64, shapeName []string) (err error) {
+func addInput(tensorName string, dataType framework.DataType, tensor interface{},
+	shapeSize []int64, shapeName []string) (tp *framework.TensorProto, err error) {
 	v := reflect.ValueOf(tensor)
 	if v.Kind() != reflect.Slice {
-		return errors.New("tensor must be slice")
+		return tp, errors.New("tensor must be slice")
 	}
 	size := v.Len()
-	tp := &framework.TensorProto{
+	tp = &framework.TensorProto{
 		Dtype: dataType,
 	}
 
@@ -80,11 +108,13 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 		tp.HalfVal, ok = tensor.([]int32)
 	case framework.DataType_DT_FLOAT:
 		tp.FloatVal, ok = tensor.([]float32)
+		// fmt.Println("tp:", tensorName, ",ok:", ok)
 	case framework.DataType_DT_DOUBLE:
 		tp.DoubleVal, ok = tensor.([]float64)
 	case framework.DataType_DT_INT16, framework.DataType_DT_INT32,
 		framework.DataType_DT_INT8, framework.DataType_DT_UINT8:
 		tp.IntVal, ok = tensor.([]int32)
+		// fmt.Println("tp:", tensorName, ",ok:", ok)
 	case framework.DataType_DT_STRING:
 		tp.StringVal, ok = tensor.([][]byte)
 	case framework.DataType_DT_COMPLEX64:
@@ -93,6 +123,7 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 		tp.Int64Val, ok = tensor.([]int64)
 	case framework.DataType_DT_BOOL:
 		tp.BoolVal, ok = tensor.([]bool)
+		// fmt.Println("tp:", tensorName, ",ok:", ok)
 	case framework.DataType_DT_COMPLEX128:
 		tp.DcomplexVal, ok = tensor.([]float64)
 	case framework.DataType_DT_RESOURCE:
@@ -105,9 +136,9 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 		if err != nil {
 			err = errors.New("Type switch failed")
 		}
-		return
+		return tp, err
 	}
-
+	// fmt.Println("tp2 :", tensorName)
 	if shapeSize == nil {
 		name := ""
 		if len(shapeName) != 0 {
@@ -123,7 +154,7 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 		}
 	} else {
 		if shapeName != nil && len(shapeName) != len(shapeSize) {
-			return errors.New("shapeName and shapeSize have different size")
+			return nil, errors.New("shapeName and shapeSize have different size")
 		}
 		tp.TensorShape = &framework.TensorShapeProto{
 			Dim: []*framework.TensorShapeProto_Dim{},
@@ -139,6 +170,6 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 			})
 		}
 	}
-	pr.Inputs[tensorName] = tp
-	return
+	// fmt.Println("tp3 :", tensorName)
+	return tp, nil
 }
