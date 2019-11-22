@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"./utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,18 +29,17 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func main() {
 	r := gin.Default()
-	utils.Init()
-	r.Use(CORSMiddleware())
-	db.Init()
 
+	r.Use(CORSMiddleware())
+	/*
 	apiUser := r.Group("/api/user")
 	{
-
 	}
+	*/
 
-	r.LoadHTMLGlob("./public/*.html")
+	// r.LoadHTMLGlob("./public/*.html")
 
-	r.Static("/static", "./casem/case_go/public/static")
+	// r.Static("/static", "./casem/case_go/public/static")
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
