@@ -12,7 +12,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/my_demo/utils"
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql" //import postgres
 )

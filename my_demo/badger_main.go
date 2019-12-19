@@ -5,8 +5,8 @@ import (
 	"github.com/dgraph-io/badger"
 	"encoding/binary"
 	"log"
-	"github.com/bigchange/go-pro/myproject/badgerdb"
-	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/my_demo/badgerdb"
+	"github.com/bigchange/go-pro/my_demo/utils"
 )
 
 

@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"context"
-	"github.com/bigchange/go-pro/myproject/utils"
-	"github.com/bigchange/go-pro/myproject/clients"
+	"github.com/bigchange/go-pro/my_demo/utils"
+	"github.com/bigchange/go-pro/my_demo/clients"
 	"testing"
 )
 

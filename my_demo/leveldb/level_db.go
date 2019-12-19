@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/my_demo/utils"
 )
 
 func int64ToBytes(i int64) []byte {

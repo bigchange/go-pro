@@ -3,7 +3,7 @@ package badgerdb
 
 
 import (
-	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/my_demo/utils"
 	"github.com/dgraph-io/badger"
 	"log"
 )
