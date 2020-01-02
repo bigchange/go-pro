@@ -11,7 +11,7 @@ import (
 )
 
 func tensorflow_client_compute() {
-	var port = flag.Int("port", 0, "GRPC server port, must be in [1024, 65535).")
+	var port = flag.Int("port", 36255, "GRPC server port, must be in [1024, 65535).")
 	var x = flag.Float64("x", 0.0, "First summand.")
 	var y = flag.Float64("y", 0.0, "Second summand.")
 	flag.Parse()

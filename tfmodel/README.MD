@@ -2,6 +2,7 @@
 
 Prerequisite: [TensorFlow-1.12.0](https://github.com/tensorflow/tensorflow/tree/v1.12.0) higher version might not be compatible.
 
+Prerequisite: [libtensorflow](https://www.tensorflow.org/install/lang_c)
 
 we provide a easy way to call tensorflow models in golang
 
