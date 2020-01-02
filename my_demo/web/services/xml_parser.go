@@ -17,8 +17,8 @@ type Recurlyservers struct {
 
 type server struct {
 	// XMLName    xml.Name `xml:"server"`
-	ServerName string   `xml:"serverName"`
-	ServerIP   string   `xml:"serverIP"`
+	ServerName string `xml:"serverName"`
+	ServerIP   string `xml:"serverIP"`
 }
 
 func XMLPareser(filePath string) {
@@ -56,6 +56,5 @@ func XMLFormat() {
 
 	os.Stdout.Write(output)
 }
-
 
 // 解析 json

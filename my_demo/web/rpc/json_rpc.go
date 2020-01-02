@@ -1,14 +1,15 @@
 package rpc
+
 // JSON RPC是数据编码采用了JSON，而不是gob编码，其他和上面介绍的RPC概念一模一样
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
-	"log"
 )
 
 type Args struct {

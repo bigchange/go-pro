@@ -32,9 +32,9 @@ func main() {
 
 	r.Use(CORSMiddleware())
 	/*
-	apiUser := r.Group("/api/user")
-	{
-	}
+		apiUser := r.Group("/api/user")
+		{
+		}
 	*/
 
 	// r.LoadHTMLGlob("./public/*.html")

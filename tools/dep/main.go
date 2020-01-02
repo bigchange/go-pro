@@ -10,15 +10,15 @@ package main
 // as this tool is installing all the dependencies it can't depend on
 // anything other than the standard library.
 import (
-"flag"
-"fmt"
-"io/ioutil"
-"os"
-"os/exec"
-"path/filepath"
-"strings"
-"sync"
-"time"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 )
 
 // Dep defines an external repository that Beam requires.
@@ -222,4 +222,3 @@ func retry(attempts int, sleep time.Duration, fn func() error) error {
 	}
 	return err
 }
-

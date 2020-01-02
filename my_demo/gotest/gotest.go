@@ -1,8 +1,9 @@
 package gotest
 
 import (
-"errors"
+	"errors"
 )
+
 // Division is a function
 func Division(a, b float64) (float64, error) {
 	if b == 0 {
@@ -11,4 +12,3 @@ func Division(a, b float64) (float64, error) {
 
 	return a / b, nil
 }
-

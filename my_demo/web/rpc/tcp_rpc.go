@@ -3,10 +3,10 @@ package rpc
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/rpc"
 	"os"
-	"log"
 )
 
 type Args struct {
@@ -60,7 +60,6 @@ func checkError(err error) {
 		os.Exit(1)
 	}
 }
-
 
 func clientTcp() {
 	if len(os.Args) != 2 {

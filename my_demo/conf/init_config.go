@@ -1,14 +1,14 @@
 package conf
 
 import (
-	"sync"
-	"io"
-	"bytes"
-	"unicode"
-	"strings"
-	"os"
 	"bufio"
+	"bytes"
+	"io"
+	"os"
 	"strconv"
+	"strings"
+	"sync"
+	"unicode"
 )
 
 var (
@@ -85,7 +85,6 @@ func LoadConfig(name string) (*Config, error) {
 	}
 	return cfg, nil
 }
-
 
 // Bool returns the boolean value for a given key.
 func (c *Config) Bool(key string) (bool, error) {

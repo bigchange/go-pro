@@ -1,13 +1,13 @@
 package gotest
 
 import (
+	"context"
 	"github.com/bgfurfeature/dgo"
+	"github.com/bigchange/go-pro/my_demo/clients"
+	"github.com/bigchange/go-pro/my_demo/utils"
 	"github.com/dgraph-io/dgo/protos/api"
 	"google.golang.org/grpc"
 	"log"
-	"context"
-	"github.com/bigchange/go-pro/my_demo/utils"
-	"github.com/bigchange/go-pro/my_demo/clients"
 	"testing"
 )
 
@@ -31,13 +31,14 @@ func TestQuaryVars(t *testing.T) {
 	}`
 	variables := make(map[string]string)
 	variables["$a"] = "0x3"
-	resp, err := dg.NewTxn().QueryWithVars(context.Background(),query,variables)
+	resp, err := dg.NewTxn().QueryWithVars(context.Background(), query, variables)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("resp:", resp)
 
 }
+
 // PASS
 func TestDgraphClient(t *testing.T) {
 	conn, err := grpc.Dial("127.0.0.1:9080", grpc.WithInsecure())
@@ -64,6 +65,7 @@ func TestDgraphClient(t *testing.T) {
 	}
 	log.Println("resp:", resp)
 }
+
 // PASS
 func DgraphClient() {
 	dclient, err := clients.NewDClients([]string{"127.0.0.1:9080"})
@@ -94,6 +96,6 @@ func DgraphClient() {
 func init() {
 }
 
-func TestInitDgraphClient(t *testing.T)  {
+func TestInitDgraphClient(t *testing.T) {
 	DgraphClient()
 }

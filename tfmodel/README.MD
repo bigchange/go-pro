@@ -10,26 +10,26 @@ And there are some examples about loading tensorflow models in different ways, i
 
 Here are more details about the whole process.
 
-## two methods to load tensorflow model
+## Two methods to load tensorflow model
 
-### method one  
+### Method one  
 
 loading model from a dir with a model file named saved_model.pb and a variables dir of the model
 
-### method two
+### Method two
 
 loading model from a freezed graph file `.pbtxt`
 
-## using tf_serving
+## Using TF_Serving
 
-### tf_serving
+### TF_Serving
 
 we start a tf_serving grpc server serving tensorflow models, we just need to write a grpc client to connect tf_serving service and call method we use predict to get result
    [rpc proto we used](http://github.com/bigchange/go-pro/tensorflow_serving/prediction_service.proto)  
 
-## how to save and deploy your model with tf_serving
+## How to save and deploy your model with tf_serving
 
-### tensorflow-model-server
+### Tensorflow-Model-Server
 
 we need to install `tensorflow-model-server`, we can install by using [bazel](https://github.com/tensorflow/serving.git) or just downloading compiled binary 
 
@@ -40,7 +40,7 @@ curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.re
 sudo apt-get update && sudo apt-get install tensorflow-model-server
 ```
 
-### saving model
+### Saving model
 
 首先需要在MetaGraphDef里加入SignatureDef部分的内容，SignatureDef详细的定义见tensorflow源码 tensorflow/core/protobuf/meta_graph.proto，下面介绍如何在python代码中加入SignatureDef内容。
 假如模型有两个节点A和B是所需要的输入，A和B的名字分别为"a:0", "b:0"， 需要的输出节点C的名字是"c:0",  保存模型代码如下：
@@ -77,7 +77,7 @@ build.saver()
 
 export result is in `/your/path/to/export/version`, with a model file named saved_model.pb and a variables dir of the model, same as `methond one` we talk about before in loading tensorflow model.
 
-### deploy your model
+### Deploy your model
 
 ```tensorflow_model_server --model_name='model_name_you_can_define' --model_base_path=/your/path/to/export --port=9099 --per_process_gpu_memory_fraction=1.0 --enable_model_warmup```
 

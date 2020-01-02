@@ -1,29 +1,28 @@
-
 package main
 
 import (
 	"strconv"
 	// "encoding/binary"
-	"github.com/dgraph-io/badger"
-	"log"
-	"github.com/bigchange/go-pro/myproject/badgerdb"
-	"testing"
 	"bufio"
 	"fmt"
+	"github.com/bigchange/go-pro/my_demo/badgerdb"
+	"github.com/dgraph-io/badger"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
 	"sync"
+	"testing"
 	"time"
 
 	"errors"
-	"github.com/bigchange/go-pro/myproject/utils"
+	"github.com/bigchange/go-pro/my_demo/utils"
 	// ldb "github.com/bigchange/go-pro/myproject/leveldb"
-	"github.com/bigchange/go-pro/myproject/example"
+	"github.com/bigchange/go-pro/my_demo/example"
 	"math/rand"
 )
 
@@ -31,21 +30,21 @@ func TestSpeed() {
 	InitDB()
 	db := badgerdb.GetDB()
 	defer db.Close()
-	start:=(time.Now().Unix())
-	var total=1000000
+	start := (time.Now().Unix())
+	var total = 1000000
 	var sst string
 	for i := 0; i < 57; i++ {
-		sst+="v"
+		sst += "v"
 	}
-	addcount:=0
+	addcount := 0
 	txn := db.NewTransaction(true)
 	batch := 0
-	for i:=0; i < total;i++ {
+	for i := 0; i < total; i++ {
 		batch = batch + 1
-		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"),[]byte(strconv.Itoa(rand.Intn(total))+sst))
+		txn.Set([]byte(strconv.Itoa(rand.Intn(total))+"333333333"), []byte(strconv.Itoa(rand.Intn(total))+sst))
 		if batch >= 10000 {
 			err := txn.Commit(nil)
-			if err!= nil {
+			if err != nil {
 				println("1 error:" + err.Error())
 			}
 			txn = db.NewTransaction(true)
@@ -55,16 +54,16 @@ func TestSpeed() {
 	}
 	if batch > 0 {
 		err := txn.Commit(nil)
-		if err!= nil {
+		if err != nil {
 			println("2 error:" + err.Error())
 		}
 	}
 	println(addcount)
-	stop:= time.Now().Unix()
-	println(stop-start)
+	stop := time.Now().Unix()
+	println(stop - start)
 }
 
-func main()  {
+func main() {
 	// ldb.TestBatchWrite()
 	// rdb.TestRocksDB()
 	TestSpeed()
@@ -74,34 +73,35 @@ func InitDB() {
 	config := &utils.LLBConfig{
 		BadgerDir: "./data/db"}
 	badgerdb.InitBadgerDB(config)
-} 
+}
 func checkError(msg string, err error) {
 	if err != nil {
-		log.Println(msg , err.Error())
+		log.Println(msg, err.Error())
 	}
 }
 func int64ToBytes(i int64) []byte {
-  return []byte(string(strconv.FormatInt(i,10)))
+	return []byte(string(strconv.FormatInt(i, 10)))
 }
 
 func bytesToInt64(b []byte) int64 {
-	res,_ := strconv.ParseInt(string(b), 10, 64)
-	return  res
+	res, _ := strconv.ParseInt(string(b), 10, 64)
+	return res
 }
 
 // Merge function to add two uint64 numbers
 func addIntValue(existing, new []byte) []byte {
 	existInt, _ := strconv.ParseInt(string(existing), 10, 64)
 	newInt, _ := strconv.ParseInt(string(new), 10, 64)
-	ret := strconv.FormatInt(existInt + newInt, 10)
-  return []byte(ret)
+	ret := strconv.FormatInt(existInt+newInt, 10)
+	return []byte(ret)
 }
+
 // command run: go test
 func TestUpdateBadgerDB(t *testing.T) {
 	InitDB()
 	db := badgerdb.GetDB()
 	defer db.Close()
-	err := db.Update(func (txn *badger.Txn) error {
+	err := db.Update(func(txn *badger.Txn) error {
 		for i := 1; i < 10; i++ {
 			key := fmt.Sprintf("answer%v", i)
 			value := fmt.Sprintf("4%v", i)
@@ -110,21 +110,21 @@ func TestUpdateBadgerDB(t *testing.T) {
 				return err
 			}
 		}
-		return nil 
+		return nil
 	})
 	checkError("update error", err)
 }
 
-func SetDBValue(key string, value interface{},	txn *badger.Txn) {
+func SetDBValue(key string, value interface{}, txn *badger.Txn) {
 	// Use the transaction...
-	if val, ok := value.(string);ok {
+	if val, ok := value.(string); ok {
 		err := txn.Set([]byte(key), []byte(val))
 		if err != nil {
 			return
 		} else {
 			log.Println("set key:", key, ",db value:", value)
 		}
-	} else if val, ok := value.(int64);ok {
+	} else if val, ok := value.(int64); ok {
 		err := txn.Set([]byte(key), int64ToBytes(val))
 		if err != nil {
 			return
@@ -141,9 +141,9 @@ func TestSetBadgerDB(t *testing.T) {
 	defer txn.Discard()
 	defer db.Close()
 	// var v2 uint64 = 0
-	SetDBValue("answer", strconv.FormatUint(40,10), txn)
+	SetDBValue("answer", strconv.FormatUint(40, 10), txn)
 	SetDBValue("answers", "4", txn)
-	SetDBValue("merge", strconv.FormatUint(100,10), txn)
+	SetDBValue("merge", strconv.FormatUint(100, 10), txn)
 	// Commit the transaction and check for error.
 	if err := txn.Commit(nil); err != nil {
 		checkError("commit error", err)
@@ -194,18 +194,18 @@ func TestMergeOperator(t *testing.T) {
 	InitDB()
 	key := "answer"
 	db := badgerdb.GetDB()
-	m := db.GetMergeOperator([]byte(key), addIntValue, 2000 * time.Millisecond)
+	m := db.GetMergeOperator([]byte(key), addIntValue, 2000*time.Millisecond)
 	defer m.Stop()
 	m.Add([]byte("1"))
 	m.Add([]byte("2"))
 	m.Add([]byte("3"))
 	res, err := m.Get()
 	if err != nil {
-		log.Println("MergeOperator error:",err.Error())
+		log.Println("MergeOperator error:", err.Error())
 		return
 	} else {
 		result, _ := strconv.ParseUint(string(res), 10, 64)
-		log.Println("Merge:", result)	
+		log.Println("Merge:", result)
 	}
 }
 

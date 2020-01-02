@@ -11,8 +11,8 @@ import (
 	"os"
 	// 如何导入其他包(hostname + project dir)
 	// "github.com/bigchange/go-pro/src/web/services"
-	"services"
 	"errors"
+	"services"
 )
 
 var caseAPI = new(services.CaseApi)

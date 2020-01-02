@@ -2,20 +2,20 @@ package leveldb
 
 import (
 	"errors"
-	"strconv"
 	"fmt"
-	"testing"
-	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/bigchange/go-pro/my_demo/utils"
+	"github.com/syndtr/goleveldb/leveldb"
+	"strconv"
+	"testing"
 )
 
 func int64ToBytes(i int64) []byte {
-  return []byte(string(strconv.FormatInt(i,10)))
+	return []byte(string(strconv.FormatInt(i, 10)))
 }
 
 func bytesToInt64(b []byte) int64 {
-	res,_ := strconv.ParseInt(string(b), 10, 64)
-	return  res
+	res, _ := strconv.ParseInt(string(b), 10, 64)
+	return res
 }
 
 func TestBatchWrite() {
@@ -27,7 +27,7 @@ func TestBatchWrite() {
 	batch := new(leveldb.Batch)
 	var i int64
 	for i = 0; i < 100; i++ {
-		batch.Put(int64ToBytes(i), int64ToBytes(i + 100))
+		batch.Put(int64ToBytes(i), int64ToBytes(i+100))
 	}
 	batch.Delete(int64ToBytes(0))
 	err = db.Write(batch, nil)
@@ -45,7 +45,7 @@ func Put(db *leveldb.DB, key []byte, value []byte) (err error) {
 	return err
 }
 
-func Get(db *leveldb.DB, key []byte) (value []byte, err  error) {
+func Get(db *leveldb.DB, key []byte) (value []byte, err error) {
 	value, err = db.Get(key, nil)
 	if err != nil {
 		return value, errors.New("DB Get ERROR")
@@ -77,4 +77,3 @@ func TestLevelDB(t *testing.T) {
 
 	defer db.Close()
 }
-

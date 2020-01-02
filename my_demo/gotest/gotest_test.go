@@ -21,4 +21,3 @@ func Test_Division_2(t *testing.T) {
 		t.Log("one test passed.", e) //记录一些你期望记录的信息
 	}
 }
-

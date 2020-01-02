@@ -1,12 +1,12 @@
 package rpc
 
 import (
-"errors"
-"fmt"
-"net/http"
-"net/rpc"
-	"os"
+	"errors"
+	"fmt"
 	"log"
+	"net/http"
+	"net/rpc"
+	"os"
 )
 
 type Args struct {

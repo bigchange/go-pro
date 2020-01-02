@@ -6,7 +6,7 @@ package gotest
 在压力测试用例中,请记得在循环体内使用testing.B.N,以使测试可以正常的运行
 文件名也必须以_test.go结尾
 go test -file webbench_test.go -test.bench=".*"
- */
+*/
 import (
 	"testing"
 )
