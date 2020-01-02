@@ -39,7 +39,7 @@ func (client *PredictionServiceClient) Close() {
 	client.Conn.Close()
 }
 
-// Note: all input tensors should be converted to 1D arry, for exampel: if you have a tensor [30,40], pls converted to [30 * 40] with specified tensor dim defineed in tensor_shape
+// Note: all input tensors should be converted to 1D arry, for example: if you have a tensor [30,40], pls converted to [30 * 40] with specified tensor dim defined in tensor_shape
 func (client *PredictionServiceClient) Predict(modelName string, signatureName string, modelVersion int64, tensorNames []string, dataTypes []framework.DataType, tensors []interface{}, shapeSizes [][]int64, shapeNames [][]string, outputNames []string) (out *pb.PredictResponse, err error) {
 	err = client.Dial()
 	if err != nil {
@@ -70,7 +70,7 @@ func (client *PredictionServiceClient) Predict(modelName string, signatureName s
 		// fmt.Println("pr final:", pr)
 		out, err = client.Stub.Predict(context.Background(), pr)
 	} else {
-		return out, errors.New("Inputs parameters length not match !!")
+		return out, errors.New("inputs parameters length not match")
 	}
 	return out, err
 }
@@ -129,12 +129,12 @@ func addInput(tensorName string, dataType framework.DataType, tensor interface{}
 	case framework.DataType_DT_RESOURCE:
 		tp.ResourceHandleVal, ok = tensor.([]*framework.ResourceHandleProto)
 	default:
-		err = errors.New("Unknown data type")
+		err = errors.New("unknown data type")
 	}
 
 	if !ok {
 		if err != nil {
-			err = errors.New("Type switch failed")
+			err = errors.New("type switch failed")
 		}
 		return tp, err
 	}
