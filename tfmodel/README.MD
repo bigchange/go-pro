@@ -1,5 +1,8 @@
 # Golang in loading tensorflow model  and predict
 
+Prerequisite: [TensorFlow-1.12.0](https://github.com/tensorflow/tensorflow/tree/v1.12.0) higher version might not be compatible.
+
+
 we provide a easy way to call tensorflow models in golang
 
 of course, there are too many unexpected problems while trying to do this. 
