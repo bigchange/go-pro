@@ -3,7 +3,6 @@
 #
 # The model essentially computes x + y.
 #
-# NOTE(yi.sun): Simple as it seems, this is a fully functioning Tensorflow.
 
 node {
   name: "x"
